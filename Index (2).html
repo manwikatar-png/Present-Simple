@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Present Simple Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e3f4ee;--card:#fff;--ink:#12304a;--sub:#4d6b80;--line:#bcd9cf;--accent:#ffc845;--accent-ink:#12304a;--ok:#1f9d63;--okbg:#d3f1e1;--bad:#d64545;--badbg:#fbdcdc;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f2230;--card:#17344a;--ink:#eaf4fb;--sub:#9db9cc;--line:#2c4d66;--okbg:#14513a;--badbg:#5a2530;--ok:#5fd99b;--bad:#ff8a8a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f2230;--card:#17344a;--ink:#eaf4fb;--sub:#9db9cc;--line:#2c4d66;--okbg:#14513a;--badbg:#5a2530;--ok:#5fd99b;--bad:#ff8a8a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Mali","Noto Sans Thai",Tahoma,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:16px}
+.app{width:100%;max-width:560px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.pill{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700}
+.score b{color:var(--ok)}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mute{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:6px 12px}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:24px 20px}
+h1{font-size:2rem;margin:0 0 8px;line-height:1.2}
+p{line-height:1.6;color:var(--sub);margin:0 0 16px}
+.pic{font-size:4.2rem;line-height:1.1;text-align:center;background:var(--bg);border:2px dashed var(--line);border-radius:16px;padding:14px 8px;margin-bottom:12px;letter-spacing:.1em}
+.q{font-size:1.5rem;font-weight:700;line-height:1.5;margin:8px 0 4px;color:var(--ink)}
+.blank{display:inline-block;min-width:90px;border-bottom:4px solid var(--accent);text-align:center;color:var(--ok)}
+.th{color:var(--sub);margin-bottom:16px}
+.opts{display:grid;gap:10px}
+.opt{background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:14px;font-size:1.15rem;font-weight:600;text-align:left}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.fb{margin-top:14px;padding:12px 14px;border-radius:14px;line-height:1.6;font-weight:600}
+.fb.ok{background:var(--okbg);color:var(--ok)}
+.fb.bad{background:var(--badbg);color:var(--bad)}
+.fb span{display:block;color:var(--ink);font-weight:400}
+.main{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:14px 22px;font-weight:700;font-size:1.1rem;width:100%;margin-top:14px}
+.big{font-size:4rem;font-weight:700;line-height:1;margin:8px 0}
+.stars{font-size:2rem;margin-bottom:8px}
+.hide{display:none}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="pill score">คะแนน <b id="sc">0</b></div>
+    <div class="pill" id="qn">0/10</div>
+    <button class="mute" id="mute" aria-label="เปิดหรือปิดเสียง">🔊</button>
+  </div>
+  <div class="bar"><i id="pg"></i></div>
+
+  <div class="card" id="start">
+    <h1>Present Simple Game</h1>
+    <p>ตอบ 10 ข้อ เลือกคำกริยาให้ถูกต้อง ตอบถูกได้ 10 คะแนน ถูกติดกัน 3 ข้อขึ้นไปได้โบนัส +5 ตอบผิดไม่ได้คะแนน เกมมีเสียงประกอบ</p>
+    <button class="main" id="go">เริ่มเล่น</button>
+  </div>
+
+  <div class="card hide" id="play">
+    <div class="pic" id="pic" aria-hidden="true"></div>
+    <div class="q" id="q"></div>
+    <div class="th" id="th"></div>
+    <div class="opts" id="opts"></div>
+    <div id="fb"></div>
+    <button class="main hide" id="next">ข้อต่อไป</button>
+  </div>
+
+  <div class="card hide" id="end" style="text-align:center">
+    <div class="stars" id="stars"></div>
+    <h1 id="endt"></h1>
+    <div class="big" id="fin">0</div>
+    <p id="sum"></p>
+    <button class="main" id="again">เล่นอีกครั้ง</button>
+  </div>
+</div>
+
+<script>
+var Q=[
+["She ___ to school every day.","go","goes","going","goes","เธอไปโรงเรียนทุกวัน","ประธาน she (เอกพจน์บุรุษที่ 3) ต้องเติม -es ท้ายกริยา: goes"],
+["They ___ football on Sundays.","play","plays","playing","play","พวกเขาเล่นฟุตบอลวันอาทิตย์","ประธาน they ใช้กริยาช่องที่ 1 ไม่เติม s: play"],
+["My father ___ coffee in the morning.","drink","drinks","drinking","drinks","พ่อของฉันดื่มกาแฟตอนเช้า","My father = he ต้องเติม s: drinks"],
+["I ___ not like spicy food.","do","does","am","do","ฉันไม่ชอบอาหารเผ็ด","ประธาน I ใช้ do not (don’t)"],
+["___ he work in a bank?","Do","Does","Is","Does","เขาทำงานในธนาคารหรือเปล่า","ประธาน he ใช้ Does ในประโยคคำถาม และกริยา work ไม่เติม s"],
+["The sun ___ in the east.","rise","rises","rising","rises","ดวงอาทิตย์ขึ้นทางทิศตะวันออก","ความจริงทั่วไป ประธาน the sun = it เติม s: rises"],
+["We ___ English on Mondays.","study","studies","studying","study","เราเรียนภาษาอังกฤษวันจันทร์","ประธาน we ใช้ study ไม่เติม s"],
+["My cat ___ milk.","love","loves","loving","loves","แมวของฉันรักนม","My cat = it เติม s: loves"],
+["She ___ not watch TV at night.","do","does","is","does","เธอไม่ดูทีวีตอนกลางคืน","ประธาน she ใช้ does not (doesn’t)"],
+["The bus ___ at 8 o’clock.","leave","leaves","leaving","leaves","รถบัสออกตอน 8 โมง","ตารางเวลาประจำ ประธาน the bus = it เติม s: leaves"]
+];
+var PIC=["👧🎒🏫","🧑‍🤝‍🧑⚽🏟️","👨☕🌅","🙅🌶️🔥","🧑‍💼🏦💼","🌅☀️⬆️","👨‍🎓📖🇬🇧","🐱🥛😻","👧📺🌙","🚌⏰🕗"];
+var $=function(i){return document.getElementById(i)};
+var i=0,score=0,streak=0,right=0,locked=false,muted=false,AC=null,musicT=null;
+
+function ctx(){try{if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)()}if(AC.state==="suspended")AC.resume()}catch(e){}return AC}
+function tone(f,t,d,type,v){if(muted)return;var a=ctx();if(!a)return;var o=a.createOscillator(),g=a.createGain();o.type=type||"sine";o.frequency.value=f;var s=a.currentTime+t;g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(v||0.18,s+0.02);g.gain.exponentialRampToValueAtTime(0.0001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d+0.02)}
+function sClick(){tone(520,0,0.08,"triangle",0.12)}
+function sOk(){tone(660,0,0.15,"triangle");tone(880,0.12,0.15,"triangle");tone(1320,0.24,0.3,"triangle")}
+function sBad(){tone(220,0,0.25,"sawtooth",0.12);tone(150,0.18,0.35,"sawtooth",0.12)}
+function sWin(){[523,659,784,1047,784,1047,1319].forEach(function(f,k){tone(f,k*0.14,0.25,"triangle")})}
+function music(on){clearInterval(musicT);musicT=null;if(!on)return;var n=[262,330,392,330,294,370,440,370],k=0;musicT=setInterval(function(){tone(n[k%8]/2,0,0.35,"sine",0.05);k++},420)}
+
+function shuffle(a){for(var x=a.length-1;x>0;x--){var y=Math.floor(Math.random()*(x+1));var t=a[x];a[x]=a[y];a[y]=t}return a}
+function show(id){["start","play","end"].forEach(function(k){$(k).classList.toggle("hide",k!==id)})}
+function hud(){$("sc").textContent=score;$("qn").textContent=Math.min(i+1,10)+"/10";$("pg").style.width=(i/10*100)+"%"}
+
+function load(){
+  locked=false;var d=Q[i];
+  $("q").innerHTML=d[0].replace("___",'<span class="blank">&nbsp;&nbsp;&nbsp;</span>');
+  $("th").textContent=d[5];$("pic").textContent=PIC[i];
+  $("fb").innerHTML="";$("next").classList.add("hide");
+  var box=$("opts");box.innerHTML="";
+  shuffle([d[1],d[2],d[3]]).forEach(function(w){
+    var b=document.createElement("button");b.className="opt";b.textContent=w;
+    b.onclick=function(){pick(b,w)};box.appendChild(b)});
+  hud();
+}
+function pick(btn,w){
+  if(locked)return;locked=true;var d=Q[i],ok=(w===d[4]);
+  Array.prototype.forEach.call($("opts").children,function(b){b.disabled=true;if(b.textContent===d[4])b.classList.add("ok")});
+  var fb=$("fb"),msg;
+  if(ok){right++;streak++;var g=10+(streak>=3?5:0);score+=g;sOk();msg="ถูกต้อง +"+g+(streak>=3?" (โบนัสต่อเนื่อง "+streak+" ข้อ)":"");fb.className="fb ok"}
+  else{streak=0;btn.classList.add("bad");sBad();msg="ยังไม่ถูก +0 คำตอบคือ "+d[4];fb.className="fb bad"}
+  fb.innerHTML=msg+"<span>"+d[6]+"</span>";
+  $("q").innerHTML=d[0].replace("___",'<span class="blank">'+d[4]+'</span>');
+  $("next").textContent=i===9?"ดูผลคะแนน":"ข้อต่อไป";$("next").classList.remove("hide");hud();
+}
+function finish(){
+  music(false);i=10;hud();$("pg").style.width="100%";sWin();
+  var st=right>=9?3:right>=6?2:right>=3?1:0;
+  $("stars").textContent="★".repeat(st)+"☆".repeat(3-st);
+  $("endt").textContent=right>=9?"เก่งมาก!":right>=6?"ทำได้ดี!":"สู้ต่อไป!";
+  $("fin").textContent=score;
+  $("sum").textContent="ตอบถูก "+right+" จาก 10 ข้อ";
+  show("end");
+}
+function begin(){i=0;score=0;streak=0;right=0;ctx();sClick();show("play");load();music(true)}
+$("go").onclick=begin;
+$("again").onclick=begin;
+$("next").onclick=function(){sClick();if(i===9){finish()}else{i++;load()}};
+$("mute").onclick=function(){muted=!muted;$("mute").textContent=muted?"🔇":"🔊";if(muted){music(false)}else if(!$("play").classList.contains("hide")){music(true)}};
+</script>
+</body>
+</html>
